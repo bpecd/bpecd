@@ -4,23 +4,63 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Update Google Sheet Cell</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    form {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
   <h1>Update Sheet Cell</h1>
   <form id="updateForm">
     <label for="sheetId">Google Sheet ID:</label>
-    <input type="text" id="sheetId" value="1G1hpAhZgrQBq7mu-jGsMixKy5FE7L4a98Fes5vF2o8o" required><br><br>
+    <input type="text" id="sheetId" value="1G1hpAhZgrQBq7mu-jGsMixKy5FE7L4a98Fes5vF2o8o" required>
 
     <label for="cellRange">Cell Range (e.g., A1):</label>
-    <input type="text" id="cellRange" required><br><br>
+    <input type="text" id="cellRange" placeholder="Enter the cell range, e.g., A1" required>
 
     <label for="cellValue">Value:</label>
-    <input type="text" id="cellValue" required><br><br>
+    <input type="text" id="cellValue" placeholder="Enter the value to update" required>
 
     <button type="submit">Update Cell</button>
   </form>
 
-  <p id="result"></p>
+  <p id="result" style="color: green;"></p>
 
   <script>
     const form = document.getElementById('updateForm');
@@ -30,8 +70,13 @@
       e.preventDefault();
 
       const sheetId = document.getElementById('sheetId').value.trim();
-      const range = document.getElementById('cellRange').value;
-      const value = document.getElementById('cellValue').value;
+      const range = document.getElementById('cellRange').value.trim();
+      const value = document.getElementById('cellValue').value.trim();
+
+      // Clear previous result message
+      result.textContent = '';
+      result.style.color = 'blue';
+      result.textContent = 'Updating...';
 
       try {
         // The URL of your Google Apps Script Web App
@@ -43,16 +88,22 @@
           body: JSON.stringify({ sheetId, range, value }),
         });
 
-        // If the response is successful, handle the JSON response
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
         const data = await response.json();
-        
+
         if (data.status === 'success') {
+          result.style.color = 'green';
           result.textContent = data.message;
         } else {
+          result.style.color = 'red';
           result.textContent = `Error: ${data.message}`;
         }
       } catch (error) {
         console.error("Error during fetch:", error);
+        result.style.color = 'red';
         result.textContent = `Error: ${error.message}`;
       }
     });
