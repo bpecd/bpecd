@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dynamic Google Sheet Editor</title>
+  <title>Update Google Sheet Cell</title>
 </head>
 <body>
-  <h1>Update Google Sheet Cell data</h1>
+  <h1>Update Google Sheet Cell</h1>
   <form id="updateForm">
     <label for="sheetId">Google Sheet ID:</label>
     <input type="text" id="sheetId" value="1G1hpAhZgrQBq7mu-jGsMixKy5FE7L4a98Fes5vF2o8o" required><br><br>
@@ -34,21 +34,22 @@
       const value = document.getElementById('cellValue').value;
 
       try {
-        console.log("Sending request to:", 'https://script.google.com/macros/s/AKfycbzM0vnkD_suLDFjj9L5Os0lfjMfRT0liav3cYlxYZezo5sg2OnIH0b0smAKVNxBCEczkQ/exec');
-        
-        const response = await fetch('https://script.google.com/macros/s/AKfycbzM0vnkD_suLDFjj9L5Os0lfjMfRT0liav3cYlxYZezo5sg2OnIH0b0smAKVNxBCEczkQ/exec', {
+        // The URL of your Google Apps Script Web App
+        const url = 'https://script.google.com/macros/s/AKfycbzM0vnkD_suLDFjj9L5Os0lfjMfRT0liav3cYlxYZezo5sg2OnIH0b0smAKVNxBCEczkQ/exec';
+
+        const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sheetId, range, value }),
         });
 
-        if (response.ok) {
-          const text = await response.text();
-          console.log("Response:", text);
-          result.textContent = text;
+        // If the response is successful, handle the JSON response
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          result.textContent = data.message;
         } else {
-          console.log("Response Error:", response.statusText);
-          result.textContent = `Error: ${response.statusText}`;
+          result.textContent = `Error: ${data.message}`;
         }
       } catch (error) {
         console.error("Error during fetch:", error);
