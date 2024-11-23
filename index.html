@@ -3,110 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Update Google Sheet Cell</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-    h1 {
-      color: #333;
-    }
-    form {
-      max-width: 400px;
-      margin: 0 auto;
-    }
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-    input {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    button {
-      background-color: #007BFF;
-      color: #fff;
-      border: none;
-      padding: 10px 15px;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    #result {
-      margin-top: 20px;
-      font-weight: bold;
-    }
-  </style>
+  <title>Update Google Sheet from External Site</title>
 </head>
 <body>
-  <h1>Update Sheet Cell</h1>
-  <form id="updateForm">
-    <label for="sheetId">Google Sheet ID:</label>
-    <input type="text" id="sheetId" value="1G1hpAhZgrQBq7mu-jGsMixKy5FE7L4a98Fes5vF2o8o" required>
+  <h1>Update Google Sheet Cell</h1>
+  
+  <label for="sheetId">Google Sheet ID:</label>
+  <input type="text" id="sheetId" value="1G1hpAhZgrQBq7mu-jGsMixKy5FE7L4a98Fes5vF2o8o" required><br><br>
 
-    <label for="cellRange">Cell Range (e.g., A1):</label>
-    <input type="text" id="cellRange" placeholder="Enter the cell range, e.g., A1" required>
+  <label for="cellRange">Cell Range (e.g., A1):</label>
+  <input type="text" id="cellRange" required><br><br>
 
-    <label for="cellValue">Value:</label>
-    <input type="text" id="cellValue" placeholder="Enter the value to update" required>
+  <label for="cellValue">Value:</label>
+  <input type="text" id="cellValue" required><br><br>
 
-    <button type="submit">Update Cell</button>
-  </form>
-
-  <p id="result" style="color: green;"></p>
+  <button onclick="updateSheetAndClose()">Update and Close Tab</button>
 
   <script>
-    const form = document.getElementById('updateForm');
-    const result = document.getElementById('result');
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
+    async function updateSheetAndClose() {
       const sheetId = document.getElementById('sheetId').value.trim();
-      const range = document.getElementById('cellRange').value.trim();
-      const value = document.getElementById('cellValue').value.trim();
+      const range = document.getElementById('cellRange').value;
+      const value = document.getElementById('cellValue').value;
 
-      // Clear previous result message
-      result.textContent = '';
-      result.style.color = 'blue';
-      result.textContent = 'Updating...';
+      const url = 'https://script.google.com/macros/s/AKfycbzFgT_ZdWQRwP6jTUXoKDI2AuuJnmfDLpxW9uMn-UO9j52k9uFXBqWhR935nVWbymGq/exec'; // Replace with your script URL
 
       try {
-        // The URL of your Google Apps Script Web App
-        const url = 'https://script.google.com/macros/s/AKfycbzFgT_ZdWQRwP6jTUXoKDI2AuuJnmfDLpxW9uMn-UO9j52k9uFXBqWhR935nVWbymGq/exec';
-
         const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sheetId, range, value }),
+          body: JSON.stringify({ sheetId, range, value })
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        if (data.status === 'success') {
-          result.style.color = 'green';
-          result.textContent = data.message;
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          alert(result.message); // Show success message
+          // Close the tab after a 3-second delay
+          setTimeout(() => {
+            window.close();
+          }, 3000);
         } else {
-          result.style.color = 'red';
-          result.textContent = `Error: ${data.message}`;
+          alert(`Error: ${result.message}`);
         }
       } catch (error) {
-        console.error("Error during fetch:", error);
-        result.style.color = 'red';
-        result.textContent = `Error: ${error.message}`;
+        alert(`Error: ${error.message}`);
       }
-    });
+    }
   </script>
 </body>
 </html>
