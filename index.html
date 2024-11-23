@@ -3,51 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Update Google Sheet from External Site</title>
+  <title>Generate Link to Update Google Sheet</title>
 </head>
 <body>
-  <h1>Update Google Sheet Cell</h1>
-  
-  <label for="sheetId">Google Sheet ID:</label>
-  <input type="text" id="sheetId" value="1G1hpAhZgrQBq7mu-jGsMixKy5FE7L4a98Fes5vF2o8o" required><br><br>
+  <h1>Generate Link to Update Google Sheet Cell</h1>
 
-  <label for="cellRange">Cell Range (e.g., A1):</label>
+  <label for="sheetId">Google Sheet ID:</label>
+  <input type="text" id="sheetId" required><br><br>
+
+  <label for="cellRange">Cell Range:</label>
   <input type="text" id="cellRange" required><br><br>
 
   <label for="cellValue">Value:</label>
   <input type="text" id="cellValue" required><br><br>
 
-  <button onclick="updateSheetAndClose()">Update and Close Tab</button>
+  <button onclick="generateLink()">Generate Link</button>
+  
+  <p id="result"></p>
 
   <script>
-    async function updateSheetAndClose() {
+    // Function to generate the link and open it in a new tab
+    function generateLink() {
       const sheetId = document.getElementById('sheetId').value.trim();
-      const range = document.getElementById('cellRange').value;
-      const value = document.getElementById('cellValue').value;
+      const cellRange = document.getElementById('cellRange').value.trim();
+      const value = document.getElementById('cellValue').value.trim();
 
-      const url = 'https://script.google.com/macros/s/AKfycbzFgT_ZdWQRwP6jTUXoKDI2AuuJnmfDLpxW9uMn-UO9j52k9uFXBqWhR935nVWbymGq/exec'; // Replace with your script URL
-
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sheetId, range, value })
-        });
-
-        const result = await response.json();
-        
-        if (result.status === 'success') {
-          alert(result.message); // Show success message
-          // Close the tab after a 3-second delay
-          setTimeout(() => {
-            window.close();
-          }, 3000);
-        } else {
-          alert(`Error: ${result.message}`);
-        }
-      } catch (error) {
-        alert(`Error: ${error.message}`);
+      if (!sheetId || !cellRange || !value) {
+        alert('Please fill in all the fields.');
+        return;
       }
+
+      // Construct the URL with sheetId and cellRange as query parameters
+      const url = `https://script.google.com/macros/s/AKfycbzFgT_ZdWQRwP6jTUXoKDI2AuuJnmfDLpxW9uMn-UO9j52k9uFXBqWhR935nVWbymGq/exec?sheetId=${sheetId}&cellRange=${cellRange}&value=${encodeURIComponent(value)}`;
+
+      // Create the link
+      const resultLink = `<a href="${url}" target="_blank" onclick="window.close(); return true;">Open in new tab and close automatically after update</a>`;
+      
+      // Display the generated link
+      document.getElementById('result').innerHTML = resultLink;
     }
   </script>
 </body>
