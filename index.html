@@ -34,13 +34,19 @@
       }
 
       // Construct the URL with sheetId and cellRange as query parameters
-      const url = `https://script.google.com/macros/s/AKfycbzFgT_ZdWQRwP6jTUXoKDI2AuuJnmfDLpxW9uMn-UO9j52k9uFXBqWhR935nVWbymGq/exec?sheetId=${sheetId}&cellRange=${cellRange}&value=${encodeURIComponent(value)}`;
+      const url = `https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec?sheetId=${sheetId}&cellRange=${cellRange}&value=${encodeURIComponent(value)}`;
 
-      // Create the link
-      const resultLink = `<a href="${url}" target="_blank" onclick="window.close(); return true;">Open in new tab and close automatically after update</a>`;
-      
-      // Display the generated link
-      document.getElementById('result').innerHTML = resultLink;
+      // Open the URL in a new tab
+      const newTab = window.open(url, '_blank');
+
+      // Check if the tab was opened successfully, then close after some delay
+      if (newTab) {
+        setTimeout(() => {
+          newTab.close(); // Close the new tab after 5 seconds
+        }, 5000); // Adjust the timeout duration as needed
+      } else {
+        alert('Failed to open the new tab. Please allow pop-ups for this website.');
+      }
     }
   </script>
 </body>
