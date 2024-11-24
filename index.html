@@ -4,6 +4,61 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Generate Link to Update Google Sheet</title>
+  <style>
+    #popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      height: 80%;
+      display: none;
+      border: 1px solid #ccc;
+      background: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+    }
+
+    #iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: none;
+    }
+
+    #loading {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.5rem;
+      color: #333;
+      z-index: 1001;
+    }
+
+    #success {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.5rem;
+      color: green;
+      z-index: 1001;
+    }
+
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      z-index: 999;
+    }
+  </style>
 </head>
 <body>
   <h1>Generate Link to Update Google Sheet Cell</h1>
@@ -21,8 +76,21 @@
   
   <p id="result"></p>
 
+  <!-- Popup structure -->
+  <div id="overlay"></div>
+  <div id="popup">
+    <iframe id="iframe" src=""></iframe>
+  </div>
+  <div id="loading">Loading...</div>
+  <div id="success">✔️ Successful!</div>
+
   <script>
-    // Function to generate the link and open it in a new tab
+    const iframe = document.getElementById('iframe');
+    const popup = document.getElementById('popup');
+    const overlay = document.getElementById('overlay');
+    const loading = document.getElementById('loading');
+    const success = document.getElementById('success');
+
     function generateLink() {
       const sheetId = document.getElementById('sheetId').value.trim();
       const cellRange = document.getElementById('cellRange').value.trim();
@@ -35,19 +103,42 @@
 
       // Construct the URL with sheetId and cellRange as query parameters
       const url = `https://script.google.com/macros/s/AKfycbzFgT_ZdWQRwP6jTUXoKDI2AuuJnmfDLpxW9uMn-UO9j52k9uFXBqWhR935nVWbymGq/exec?sheetId=${sheetId}&cellRange=${cellRange}&value=${encodeURIComponent(value)}`;
+      
+      // Show popup and load the iframe
+      loading.style.display = 'block';
+      popup.style.display = 'block';
+      overlay.style.display = 'block';
+      iframe.style.display = 'none';
+      iframe.src = url;
 
-      // Open the URL in a new tab
-      const newTab = window.open(url, '_blank');
+      iframe.onload = () => {
+        loading.style.display = 'none';
+        iframe.style.display = 'block';
 
-      // Check if the tab was opened successfully, then close after some delay
-      if (newTab) {
+        // Automatically close after 4 seconds
         setTimeout(() => {
-          newTab.close(); // Close the new tab after 5 seconds
-        }, 5000); // Adjust the timeout duration as needed
-      } else {
-        alert('Failed to open the new tab. Please allow pop-ups for this website.');
-      }
+          closePopup();
+        }, 4000);
+      };
     }
+
+    function closePopup() {
+      popup.style.display = 'none';
+      overlay.style.display = 'none';
+      iframe.src = ''; // Clear the iframe content
+      success.style.display = 'block';
+
+      setTimeout(() => {
+        success.style.display = 'none';
+      }, 2000); // Hide the success message after 2 seconds
+    }
+
+    // Allow iframe communication
+    window.addEventListener('message', (event) => {
+      if (event.data === 'closeIframe') {
+        closePopup();
+      }
+    });
   </script>
 </body>
 </html>
