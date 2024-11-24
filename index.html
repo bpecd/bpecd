@@ -91,54 +91,64 @@
     const loading = document.getElementById('loading');
     const success = document.getElementById('success');
 
-    function generateLink() {
-      const sheetId = document.getElementById('sheetId').value.trim();
-      const cellRange = document.getElementById('cellRange').value.trim();
-      const value = document.getElementById('cellValue').value.trim();
+    // Track whether the popup has been closed already
+let isPopupClosed = false;
 
-      if (!sheetId || !cellRange || !value) {
-        alert('Please fill in all the fields.');
-        return;
-      }
+function generateLink() {
+  const sheetId = document.getElementById('sheetId').value.trim();
+  const cellRange = document.getElementById('cellRange').value.trim();
+  const value = document.getElementById('cellValue').value.trim();
 
-      // Construct the URL with sheetId and cellRange as query parameters
-      const url = `https://script.google.com/macros/s/AKfycbzFgT_ZdWQRwP6jTUXoKDI2AuuJnmfDLpxW9uMn-UO9j52k9uFXBqWhR935nVWbymGq/exec?sheetId=${sheetId}&cellRange=${cellRange}&value=${encodeURIComponent(value)}`;
-      
-      // Show popup and load the iframe
-      loading.style.display = 'block';
-      popup.style.display = 'block';
-      overlay.style.display = 'block';
-      iframe.style.display = 'none';
-      iframe.src = url;
+  if (!sheetId || !cellRange || !value) {
+    alert('Please fill in all the fields.');
+    return;
+  }
 
-      iframe.onload = () => {
-        loading.style.display = 'none';
-        iframe.style.display = 'block';
+  // Construct the URL with sheetId and cellRange as query parameters
+  const url = `https://script.google.com/macros/s/AKfycbzFgT_ZdWQRwP6jTUXoKDI2AuuJnmfDLpxW9uMn-UO9j52k9uFXBqWhR935nVWbymGq/exec?sheetId=${sheetId}&cellRange=${cellRange}&value=${encodeURIComponent(value)}`;
+  
+  // Reset popup state
+  isPopupClosed = false;
+  loading.style.display = 'block';
+  popup.style.display = 'block';
+  overlay.style.display = 'block';
+  iframe.style.display = 'none';
+  iframe.src = url;
 
-        // Automatically close after 4 seconds
-        setTimeout(() => {
-          closePopup();
-        }, 4000);
-      };
-    }
+  iframe.onload = () => {
+    loading.style.display = 'none';
+    iframe.style.display = 'block';
 
-    function closePopup() {
-      popup.style.display = 'none';
-      overlay.style.display = 'none';
-      iframe.src = ''; // Clear the iframe content
-      success.style.display = 'block';
+    // Automatically close after 4 seconds
+    setTimeout(() => {
+      closePopup();
+    }, 4000);
+  };
+}
 
-      setTimeout(() => {
-        success.style.display = 'none';
-      }, 2000); // Hide the success message after 2 seconds
-    }
+function closePopup() {
+  // Prevent multiple calls
+  if (isPopupClosed) return;
 
-    // Allow iframe communication
-    window.addEventListener('message', (event) => {
-      if (event.data === 'closeIframe') {
-        closePopup();
-      }
-    });
+  isPopupClosed = true; // Mark as closed
+  popup.style.display = 'none';
+  overlay.style.display = 'none';
+  iframe.src = ''; // Clear the iframe content
+  success.style.display = 'block';
+
+  // Hide the success message after 2 seconds
+  setTimeout(() => {
+    success.style.display = 'none';
+  }, 2000);
+}
+
+// Allow iframe communication
+window.addEventListener('message', (event) => {
+  if (event.data === 'closeIframe') {
+    closePopup();
+  }
+});
+
   </script>
 </body>
 </html>
